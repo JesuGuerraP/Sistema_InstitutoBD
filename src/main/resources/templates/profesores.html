@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Gestión de Profesores</title>
+    <link th:href="@{/css/profesor.css}" rel="stylesheet" />
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- DataTables -->
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<!-- Sidebar -->
+<nav class="sidebar">
+    <h4>
+        <i class="fas fa-graduation-cap"></i>
+        Instituto Técnico Atucsara
+    </h4>
+
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" id="searchInput" placeholder="Buscar Profesor" aria-label="Buscar profesor" aria-describedby="button-search">
+        <button class="btn btn-primary" type="button" id="button-search" onclick="buscarProfesores()">
+            <i class="fas fa-search"></i> Buscar
+        </button>
+    </div>
+
+    <div class="nav flex-column">
+        <a class="nav-link" href="/">
+            <i class="fas fa-home"></i> Inicio
+        </a>
+        <a class="nav-link" href="/alumnos">
+            <i class="fas fa-users"></i> Alumnos
+        </a>
+        <a class="nav-link active" href="/profesores">
+            <i class="fas fa-chalkboard-teacher"></i> Profesores
+        </a>
+        <a class="nav-link" href="/notas">
+            <i class="fas fa-star"></i> Notas
+        </a>
+        <a class="nav-link" href="/finanzas">
+            <i class="fas fa-dollar-sign"></i> Finanzas
+        </a>
+        <a class="nav-link" href="/acerca">
+            <i class="fas fa-info-circle"></i> Acerca de
+        </a>
+    </div>
+
+
+    <!-- Botón para abrir el modal de cerrar sesión -->
+    <a href="#" class="btn btn-danger mt-4 w-100" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+    </a>
+</nav>
+
+<div class="main-content">
+    <h1 class="text-center">Profesores</h1>
+
+    <!-- Botón para agregar profesor -->
+    <div class="d-flex justify-content-end">
+        <a href="/profesores/nuevo" class="btn btn-success mb-3">➕ Agregar Nuevo Profesor</a>
+    </div>
+
+    <!-- Tabla de profesores -->
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Nombres</th>
+            <th>Apellidos</th>
+            <th>Identificación</th>
+            <th>Correo Electrónico</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="profesor : ${profesores}">
+            <td th:text="${profesor.id}"></td>
+            <td th:text="${profesor.nombres}"></td>
+            <td th:text="${profesor.apellidos}"></td>
+            <td th:text="${profesor.identificacion}"></td>
+            <td th:text="${profesor.correoElectronico}"></td>
+            <td>
+                <button type="button" class="btn btn-warning btn-sm"
+                        th:onclick="'verDetalles(' + ${profesor.id} + ')'"
+                        data-bs-toggle="modal"
+                        data-bs-target="#profesorModal">
+                    👁️ Ver
+                </button>
+                <a th:href="@{'/profesores/editar/' + ${profesor.id}}" class="btn btn-warning btn-sm">✏️ Editar</a>
+
+                <!-- En tu HTML, reemplaza el form por un botón -->
+                <button type="button"
+                        th:onclick="'eliminarProfesor(' + ${profesor.id} + ')'"
+                        class="btn btn-danger btn-sm">
+                    🗑️ Eliminar
+                </button>
+
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutModalLabel">Confirmar Cierre de Sesión</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas cerrar sesión?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <a href="/logout" class="btn btn-danger">Sí, cerrar sesión</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal para ver detalles del profesor -->
+<div class="modal fade" id="profesorModal" tabindex="-1" aria-labelledby="profesorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="profesorModalLabel">Detalles del Profesor</h5>
+                <button type="button" onclick="verDetallesProfesor" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>ID:</strong> <span id="profesor-id"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Nombres:</strong> <span id="profesor-nombres"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Apellidos:</strong> <span id="profesor-apellidos"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Identificación:</strong> <span id="profesor-identificacion"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Género:</strong> <span id="profesor-genero"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Dirección:</strong> <span id="profesor-direccion"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Teléfono:</strong> <span id="profesor-telefono"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Correo Electrónico:</strong> <span id="profesor-correoElectronico"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Fecha de Ingreso:</strong> <span id="profesor-fechaIngreso"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Nivel Académico:</strong> <span id="profesor-nivelAcademico"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Agrega esto justo después de tus imports de scripts
+var token = $("meta[name='_csrf']").attr("content");
+var header = $("meta[name='_csrf_header']").attr("content");
+
+$(document).ajaxSend(function(e, xhr, options) {
+    if(header && token) {
+        xhr.setRequestHeader(header, token);
+    }
+});
+
+// Obtener el botón de cierre de sesión
+const logoutBtn = document.getElementById('logoutBtn');
+
+// Agregar un evento click al botón
+logoutBtn.addEventListener('click', (event) => {
+    event.preventDefault(); // Evitar que el enlace se ejecute directamente
+
+    // Abrir el modal manualmente
+    const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
+    logoutModal.show();
+});
+
+
+
+
+    // Función Buscar profesores
+ function buscarProfesores() {
+    const searchTerm = document.getElementById('searchInput').value;
+    const resultContainer = document.querySelector('tbody'); // Selecciona el tbody de la tabla
+    resultContainer.innerHTML = ''; // Limpiar resultados previos
+
+    const endpoint = searchTerm.trim() === '' ? '/profesores' : `/profesores/buscarProfesores?searchTerm=${encodeURIComponent(searchTerm)}`;
+
+    fetch(endpoint)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la solicitud');
+            }
+            return response.json();
+        })
+        .then(profesores => {
+            if (profesores.length === 0) {
+                const noResultsRow = document.createElement('tr');
+                noResultsRow.innerHTML = '<td colspan="6" class="text-center">No se encontraron resultados.</td>';
+                resultContainer.appendChild(noResultsRow);
+                return;
+            }
+
+            profesores.forEach(profesor => {
+                const profesorRow = document.createElement('tr');
+                profesorRow.innerHTML = `
+                    <td>${profesor.id}</td>
+                    <td>${profesor.nombres}</td>
+                    <td>${profesor.apellidos}</td>
+                    <td>${profesor.identificacion}</td>
+                    <td>${profesor.correoElectronico}</td>
+                    <td>
+                        <button type="button" class="btn btn-warning btn-sm"
+                                onclick="verDetalles(${profesor.id})"
+                                data-bs-toggle="modal"
+                                data-bs-target="#profesorModal">
+                            👁️ Ver
+                        </button>
+                        <a href="/profesores/editar/${profesor.id}" class="btn btn-warning btn-sm">✏️ Editar</a>
+
+                      <button
+                         type="button" class="btn btn-danger btn-sm" onclick="eliminarProfesor(${profesor.id})"> 🗑️ Eliminar
+                        </button>
+</button>
+                    </td>
+                `;
+                resultContainer.appendChild(profesorRow);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+    <!--Funcion ver detalles-->
+
+    function verDetalles(id) {
+        console.log("Solicitando detalles del profesor con ID:", id);
+
+        $.ajax({
+            url: '/profesores/detalles/' + id,
+            type: 'GET',
+            contentType: 'application/json',
+            success: function(profesor) {
+                console.log("Datos recibidos del profesor:", profesor);
+
+                // Actualizar los campos del modal con los datos recibidos
+                $('#profesor-id').text(profesor.id || '');
+                $('#profesor-nombres').text(profesor.nombres || '');
+                $('#profesor-apellidos').text(profesor.apellidos || '');
+                $('#profesor-identificacion').text(profesor.identificacion || '');
+                $('#profesor-genero').text(profesor.genero || '');
+                $('#profesor-direccion').text(profesor.direccion || '');
+                $('#profesor-telefono').text(profesor.telefono || '');
+                $('#profesor-correoElectronico').text(profesor.correoElectronico || '');
+                $('#profesor-fechaIngreso').text(profesor.fechaIngreso || '');
+                $('#profesor-nivelAcademico').text(profesor.nivelAcademico || '');
+
+                // Mostrar el modal
+                $('#profesorModal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                console.error("Error al obtener detalles del profesor:");
+                console.error("Estado:", status);
+                console.error("Error:", error);
+                console.error("Respuesta:", xhr.responseText);
+                alert('No se pudieron cargar los detalles del profesor. Por favor, intente nuevamente.');
+            }
+        });
+    }
+
+    function confirmLogout() {
+        return confirm("¿Estás seguro de que deseas cerrar sesión?");
+    }
+
+    // Limpiar el modal cuando se cierre
+    $('#profesorModal').on('hidden.bs.modal', function () {
+        $('#profesor-id').text('');
+        $('#profesor-nombres').text('');
+        $('#profesor-apellidos').text('');
+        $('#profesor-identificacion').text('');
+        $('#profesor-genero').text('');
+        $('#profesor-direccion').text('');
+        $('#profesor-telefono').text('');
+        $('#profesor-correoElectronico').text('');
+        $('#profesor-fechaIngreso').text('');
+        $('#profesor-nivelAcademico').text('');
+    });
+
+
+
+// Modifica la URL en tu función JavaScript
+function eliminarProfesor(id) {
+    console.log("Intentando eliminar profesor con ID:", id);
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Esta acción no se puede deshacer",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '/profesores/eliminar/' + id,  // URL corregida
+                type: 'POST',
+                success: function(response) {
+                    console.log("Éxito - Respuesta del servidor:", response);
+                    Swal.fire(
+                        '¡Eliminado!',
+                        'El profesor ha sido eliminado.',
+                        'success'
+                    ).then(() => {
+                        window.location.reload();
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.log("Error:", error);
+                    Swal.fire(
+                        'Error',
+                        'No se pudo eliminar el profesor.',
+                        'error'
+                    );
+                }
+            });
+        }
+    });
+}
+</script>
+</body>
+</html>

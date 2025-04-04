@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agregar Alumno</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+  <h1 class="text-center">Agregar Nuevo Alumno</h1>
+
+  <form th:action="@{/alumnos/save}" method="post" class="border p-4 shadow rounded">
+    <div class="mb-3">
+      <label class="form-label">Nombres</label>
+      <input type="text" name="nombres" class="form-control" th:value="${alumno.nombres}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Apellidos</label>
+      <input type="text" name="apellidos" class="form-control" th:value="${alumno.apellidos}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Identificación</label>
+      <input type="text" name="identificacion" class="form-control" th:value="${alumno.identificacion}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Género</label>
+      <select name="genero" class="form-control" required>
+        <option value="" disabled selected>Seleccione...</option>
+        <option value="Masculino" th:selected="${alumno.genero == 'Masculino'}">Masculino</option>
+        <option value="Femenino" th:selected="${alumno.genero == 'Femenino'}">Femenino</option>
+        <option value="Otro" th:selected="${alumno.genero == 'Otro'}">Otro</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Curso</label>
+      <select name="curso" class="form-control" required>
+        <option value="" disabled selected>Seleccione...</option>
+        <option value="Técnico / Servicio Social y Comunitario" th:selected="${alumno.curso == 'Técnico / Servicio Social y Comunitario'}">Técnico / Servicio Social y Comunitario</option>
+        <option value="Técnico / Tecnologías de la Información" th:selected="${alumno.curso == 'Técnico / Tecnologías de la Información'}">Técnico / Tecnologías de la Información</option>
+        <option value="Técnico / Agropecuario" th:selected="${alumno.curso == 'Técnico / Agropecuario'}">Técnico / Agropecuario</option>
+        <option value="Técnico / Auxiliar Administrativo" th:selected="${alumno.curso == 'Técnico / Auxiliar Administrativo'}">Técnico / Auxiliar Administrativo</option>
+        <option value="Técnica / Primera Infancia" th:selected="${alumno.curso == 'Técnica / Primera Infancia'}">Técnica / Primera Infancia</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Profesor</label><select name="profesorId" class="form-control" required>
+      <option value="" disabled selected>Seleccione un Profesor</option>
+      <option th:each="profesor : ${profesores}" th:value="${profesor.id}" th:text="${profesor.nombres}" th:selected="${profesor.id == alumno.profesor?.id}"></option>
+    </select>
+
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Nivel Académico</label>
+      <select name="nivelAcademico" class="form-control" required>
+        <option value="" disabled selected>Seleccione...</option>
+        <option value="Bachiller" th:selected="${alumno.nivelAcademico == 'Bachiller'}">Bachiller</option>
+        <option value="Técnico" th:selected="${alumno.nivelAcademico == 'Técnico'}">Técnico</option>
+        <option value="Universitario" th:selected="${alumno.nivelAcademico == 'Universitario'}">Universitario</option>
+        <option value="Secundaria" th:selected="${alumno.nivelAcademico == 'Secundaria'}">Secundaria</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Semestre</label>
+      <select name="semestre" class="form-control" required>
+        <option value="" disabled selected>Seleccione...</option>
+        <option value="Primer" th:selected="${alumno.semestre == 'Primer'}">Primer</option>
+        <option value="Segundo" th:selected="${alumno.semestre == 'Segundo'}">Segundo</option>
+        <option value="Práctica" th:selected="${alumno.semestre == 'Práctica'}">Práctica</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Dirección</label>
+      <input type="text" name="direccion" class="form-control" th:value="${alumno.direccion}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Fecha de Ingreso</label>
+      <input type="date" name="fechaIngreso" class="form-control" th:value="${alumno.fechaIngreso}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Correo Electrónico</label>
+      <input type="email" name="correoElectronico" class="form-control"
+             th:value="${alumno.correoElectronico}" placeholder="Correo Electrónico"
+             required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" title="Ingrese un correo electrónico válido">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Teléfono</label>
+      <input type="text" name="telefono" class="form-control" th:value="${alumno.telefono}" required>
+    </div>
+
+    <div class="d-flex justify-content-between">
+      <button type="submit" class="btn btn-primary">Guardar</button>
+      <a href="/alumnos" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+</body>
+</html>

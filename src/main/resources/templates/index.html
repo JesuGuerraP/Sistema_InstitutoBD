@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Instituto Técnico Laboral Atucsara</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        .hero {
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            padding: 40px 0;  /* Reducido de 100px */
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;  /* Añadido para mejor espaciado */
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            animation: fadeInUp 0.5s;  /* Reducido tiempo de animación */
+        }
+
+        .hero-title {
+            font-size: 36px;  /* Reducido de 48px */
+            font-weight: bold;
+            margin-bottom: 10px;  /* Reducido de 20px */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-description {
+            font-size: 18px;  /* Reducido de 24px */
+            margin-bottom: 20px;  /* Reducido de 40px */
+            opacity: 0.9;
+        }
+
+        .hero-icon {
+            font-size: 56px;  /* Reducido de 82px */
+            color: #ffffff;
+            margin-bottom: 15px;  /* Reducido de 30px */
+            animation: bounce 2s infinite;
+        }
+
+        .feature-box {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;  /* Reducido de 30px */
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;  /* Asegura altura uniforme */
+            margin-bottom: 20px;  /* Añadido para mejor espaciado móvil */
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 36px;  /* Reducido de 48px */
+            color: #4f46e5;
+            margin-bottom: 15px;  /* Reducido de 20px */
+        }
+
+        .feature-title {
+            font-size: 20px;  /* Reducido de 24px */
+            font-weight: bold;
+            margin-bottom: 8px;  /* Reducido de 10px */
+        }
+
+        .feature-description {
+            font-size: 14px;  /* Reducido de 16px */
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+
+        .btn-hero {
+            font-size: 16px;  /* Reducido de 18px */
+            padding: 10px 30px;  /* Reducido de 15px 40px */
+            border-radius: 25px;
+            background-color: white;
+            color: #4f46e5;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background-color: #f8f9fa;
+            color: #818cf8;
+            text-decoration: none;
+        }
+
+        .container {
+            padding-top: 20px;  /* Añadido para mejor espaciado */
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-15px);}  /* Reducido de -20px */
+            60% {transform: translateY(-7px);}   /* Reducido de -10px */
+        }
+
+        /* Mejoras responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 30px 0;
+            }
+
+            .hero-title {
+                font-size: 28px;
+            }
+
+            .hero-description {
+                font-size: 16px;
+            }
+
+            .hero-icon {
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="hero">
+    <div class="hero-content animate__animated animate__fadeIn">
+        <i class="fas fa-school hero-icon"></i>
+        <h1 class="hero-title">Bienvenido al Instituto Técnico Laboral Atucsara</h1>
+        <p class="hero-description">Explore nuestras secciones y gestiona eficientemente tus recursos</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="feature-box">
+                <i class="fas fa-user-graduate feature-icon"></i>
+                <h3 class="feature-title">Alumnos</h3>
+                <p class="feature-description">Gestiona la información de tus alumnos</p>
+                <a href="/alumnos" class="btn btn-hero">Ver Alumnos</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-box">
+                <i class="fas fa-chalkboard-teacher feature-icon"></i>
+                <h3 class="feature-title">Profesores</h3>
+                <p class="feature-description">Administra el equipo docente del instituto</p>
+                <a href="/profesores" class="btn btn-hero">Ver Profesores</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-box">
+                <i class="fas fa-book-open feature-icon"></i>
+                <h3 class="feature-title">Notas</h3>
+                <p class="feature-description">Revisa y gestiona las notas de los estudiantes</p>
+                <a href="/notas" class="btn btn-hero">Ver Notas</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="feature-box">
+                <i class="fas fa-chart-line feature-icon"></i>
+                <h3 class="feature-title">Finanzas</h3>
+                <p class="feature-description">Controla los ingresos y egresos del instituto</p>
+                <a href="/finanzas" class="btn btn-hero">Ver Finanzas</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-box">
+                <i class="fas fa-cogs feature-icon"></i>
+                <h3 class="feature-title">Configuración</h3>
+                <p class="feature-description">Ajusta los parámetros y preferencias del sistema</p>
+                <a href="/configuracion" class="btn btn-hero">Ir a Configuración</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-box">
+                <i class="fas fa-info-circle feature-icon"></i>
+                <h3 class="feature-title">Acerca de</h3>
+                <p class="feature-description">Información sobre el Instituto Técnico Laboral Atucsara</p>
+                <a href="/acerca" class="btn btn-hero">Ver Acerca de</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

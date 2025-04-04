@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instituto Técnico Laboral Atucsara - Inicio de Sesión</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* Estilos personalizados */
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #818cf8;
+            --background-color: #f3f4f6;
+            --card-background: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: var(--card-background) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+        }
+
+        .login-container {
+            display: flex;
+            min-height: calc(100vh - 76px);
+            padding: 2rem 0;
+        }
+
+        .features-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem;
+            border-radius: 1rem 0 0 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .features-section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateX(10px);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .feature-text {
+            font-size: 1rem;
+        }
+
+        .login-form-section {
+            background: var(--card-background);
+            padding: 3rem;
+            border-radius: 0 1rem 1rem 0;
+        }
+
+        .login-form-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form-title {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-control {
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn-login {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .register-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .register-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 992px) {
+            .login-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .features-section, .login-form-section {
+                border-radius: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .features-section {
+                padding: 2rem;
+            }
+
+            .login-form-section {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-school mr-2"></i>
+            Instituto Técnico Laboral Atucsara
+        </a>
+    </div>
+</nav>
+
+<div class="container login-container">
+    <div class="row g-0 w-100 shadow-lg">
+        <div class="col-lg-6">
+            <div class="features-section">
+                <h2>Construye tu Futuro, ¡Comienza Ahora!</h2>
+                <div class="feature-item">
+                    <i class="fas fa-user-graduate feature-icon"></i>
+                    <div class="feature-text">
+                        Programas técnicos laborales exitosos
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-globe feature-icon"></i>
+                    <div class="feature-text">
+                        Alianzas internacionales
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-building feature-icon"></i>
+                    <div class="feature-text">
+                        Edificio Atucsara, Barrio Montecatini
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-phone feature-icon"></i>
+                    <div class="feature-text">
+                        Contáctanos al 320 534 0909
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="login-form-section">
+                <div class="login-form-container">
+                    <h1 class="form-title">Bienvenido de vuelta</h1>
+                    <form th:action="@{/login}" method="post">
+                        <div th:if="${param.error}" class="alert alert-danger mb-3">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Usuario o contraseña inválidos
+                        </div>
+                        <div th:if="${param.logout}" class="alert alert-success mb-3">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Has cerrado sesión correctamente
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Correo Electrónico</label>
+                            <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                <input type="email" class="form-control" id="username" name="username"
+                                       required autofocus placeholder="Ingresa tu correo electrónico">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                <input type="password" class="form-control" id="password" name="password"
+                                       required placeholder="Ingresa tu contraseña">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-login btn-primary mb-4">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Iniciar Sesión
+                        </button>
+
+                        <div class="text-center">
+                            <p class="mb-0">Registrar nuevo administrador</p>
+                            <a th:href="@{/registro}" class="register-link">
+                                Crea una cuenta
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

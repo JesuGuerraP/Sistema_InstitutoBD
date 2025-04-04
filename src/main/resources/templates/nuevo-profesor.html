@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Nuevo Profesor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+        background-color: #f8f9fa; /* Color de fondo suave */
+    }
+    h1 {
+        color: #007BFF; /* Color del encabezado */
+    }
+    label {
+        font-weight: bold; /* Negrita para las etiquetas */
+    }
+    .form-control {
+        margin-bottom: 15px; /* Espaciado entre campos */
+    }
+    .btn-success {
+        background-color: #28a745; /* Color verde para guardar */
+    }
+    .btn-danger {
+        background-color: #dc3545; /* Color rojo para cancelar */
+    }
+  </style>
+</head>
+<body>
+<div class="container mt-4">
+  <h1 class="text-center">Agregar Nuevo Profesor</h1>
+  <form th:action="@{/profesores/nuevo}" th:object="${profesor}" method="post">
+    <div class="mb-3">
+      <label for="nombres">Nombres:</label>
+      <input type="text" id="nombres" th:field="*{nombres}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="apellidos">Apellidos:</label>
+      <input type="text" id="apellidos" th:field="*{apellidos}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="identificacion">Identificación:</label>
+      <input type="text" id="identificacion" th:field="*{identificacion}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+    <label class="form-label">Género</label>
+    <select name="genero" class="form-control" required>
+      <option value="" disabled selected>Seleccione...</option>
+      <option value="Masculino" th:selected="${profesor.genero == 'Masculino'}">Masculino</option>
+      <option value="Femenino" th:selected="${profesor.genero == 'Femenino'}">Femenino</option>
+      <option value="Otro" th:selected="${profesor.genero == 'Otro'}">Otro</option>
+    </select>
+</div>
+
+    <div class="mb-3">
+      <label for="direccion">Dirección:</label>
+      <input type="text" id="direccion" th:field="*{direccion}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="telefono">Teléfono:</label>
+      <input type="tel" id="telefono" th:field="*{telefono}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="correoElectronico">Correo Electrónico:</label>
+      <input type="email" id="correoElectronico" th:field="*{correoElectronico}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="fechaIngreso">Fecha de Ingreso:</label>
+      <input type="date" id="fechaIngreso" th:field="*{fechaIngreso}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Nivel Académico</label>
+      <select name="nivelAcademico" class="form-control" required>
+        <option value="" disabled selected>Seleccione...</option>
+        <option value="Especialista" th:selected="${profesor.nivelAcademico == 'Especialista'}">Especialista</option>
+        <option value="Técnico" th:selected="${profesor.nivelAcademico == 'Técnico'}">Técnico</option>
+        <option value="Pre-grado" th:selected="${profesor.nivelAcademico == 'Pre-grado'}">Pre-Grado</option>
+        <option value="Pos-grado" th:selected="${profesor.nivelAcademico == 'Pos-grado
+        '}">Pos-Grado</option>
+      </select>
+    </div>
+
+    <div class="d-flex justify-content-end">
+      <button type="submit" class="btn btn-success">Guardar</button>
+      <a href="/profesores" class="btn btn-danger ms-2">Cancelar</a>
+    </div>
+  </form>
+</div>
+</body>
+</html>

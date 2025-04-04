@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanzas - Instituto Técnico Atucsara</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- DataTables -->
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link th:href="@{/css/finanza.css}" rel="stylesheet" />
+
+
+
+</head>
+
+<body>
+<!-- Sidebar -->
+<nav class="sidebar">
+    <h4>
+        <i class="fas fa-graduation-cap"></i>
+        Instituto Técnico Atucsara
+    </h4>
+
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" id="searchInput" placeholder="Buscar Finanza">
+        <button class="btn btn-primary" type="button" id="searchButton">
+            <i class="fas fa-search"></i>
+        </button>
+    </div>
+
+    <div class="nav flex-column">
+        <a class="nav-link" href="/">
+            <i class="fas fa-home"></i> Inicio
+        </a>
+        <a class="nav-link" href="/alumnos">
+            <i class="fas fa-users"></i> Alumnos
+        </a>
+        <a class="nav-link" href="/profesores">
+            <i class="fas fa-chalkboard-teacher"></i> Profesores
+        </a>
+        <a class="nav-link" href="/notas">
+            <i class="fas fa-star"></i> Notas
+        </a>
+        <a class="nav-link active" href="/finanzas">
+            <i class="fas fa-dollar-sign"></i> Finanzas
+        </a>
+        <a class="nav-link" href="/acerca">
+            <i class="fas fa-info-circle"></i> Acerca de
+        </a>
+    </div>
+
+    <button class="btn btn-danger mt-4 w-100" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+    </button>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="fas fa-dollar-sign"></i> Finanzas
+        </h1>
+        <a href="/finanzas/new" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nueva Finanza
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">Estado de pago</label>
+                    <select class="form-select" id="estadoPagoFilter">
+                        <option value="">Todos</option>
+                        <option value="pagado">Pagado</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="atrasado">Atrasado</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Ordenar por</label>
+                    <select class="form-select" id="ordenarPor">
+                        <option value="nombre">Nombre</option>
+                        <option value="deuda">Deuda Total</option>
+                        <option value="fecha">Fecha de Pago</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Mostrar</label>
+                    <select class="form-select" id="mostrarRegistros">
+                        <option value="10">10 registros</option>
+                        <option value="25">25 registros</option>
+                        <option value="50">50 registros</option>
+                        <option value="100">100 registros</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Finanzas -->
+    <div class="table-responsive">
+        <table class="table table-striped table-hover" id="finanzasTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Alumno</th>
+                <th>Inscripción</th>
+                <th>Descuento</th>
+                <th>Valor Semestre</th>
+                <th>Pagos Realizados</th>
+                <th>Total Pagado</th>
+                <th>Deuda Total</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="finanza : ${finanzas}">
+                <td th:text="${finanza.id}"></td>
+                <td th:text="${finanza.alumnoNombres}"></td>
+                <td th:text="${#numbers.formatCurrency(finanza.pagoInscripcion)}"></td>
+                <td th:text="${finanza.descuento + '%'}"></td>
+                <td th:text="${#numbers.formatCurrency(finanza.valorSemestre)}"></td>
+                <td>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar"
+                             th:style="'width: ' + ${(finanza.totalPagadoSemestre / finanza.valorSemestre) * 100} + '%'"
+                             th:text="${#numbers.formatDecimal((finanza.totalPagadoSemestre / finanza.valorSemestre) * 100, 1, 1) + '%'}">
+                        </div>
+                    </div>
+                </td>
+                <td th:text="${#numbers.formatCurrency(finanza.totalPagadoSemestre)}"></td>
+                <td th:text="${#numbers.formatCurrency(finanza.deudaTotalSemestre)}"></td>
+                <td>
+                            <span th:class="${finanza.deudaTotalSemestre == 0 ? 'badge bg-success' :
+                                           (finanza.deudaTotalSemestre == finanza.valorSemestre ? 'badge bg-danger' : 'badge bg-warning')}"
+                                  th:text="${finanza.deudaTotalSemestre == 0 ? 'Pagado' :
+                                           (finanza.deudaTotalSemestre == finanza.valorSemestre ? 'Pendiente' : 'Parcial')}">
+                            </span>
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <!-- Botón de Editar -->
+                        <a th:href="@{/finanzas/editar/{id}(id=${finanza.id})}" class="btn btn-editar">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+
+
+                        <button type="button" class="btn btn-info btn-sm me-1"
+                                th:onclick="'verDetallesFinanza(' + ${finanza.id} + ')'"
+                                title="Ver detalles">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+
+                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" th:data-id="${finanza.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar este registro?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalles de Finanza -->
+<div class="modal fade" id="verDetallesFinanza" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">Detalles de Finanza</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">ID:</label>
+                            <span id="finanzaId" class="form-control"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Alumno:</label>
+                            <span id="finanzaAlumno" class="form-control"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Pago de Inscripción:</label>
+                            <span id="finanzaPagoInscripcion" class="form-control"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descuento (%):</label>
+                            <span id="finanzaDescuento" class="form-control"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Valor Semestre:</label>
+                            <span id="finanzaValorSemestre" class="form-control"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Total Pagado Semestre:</label>
+                            <span id="finanzaTotalPagadoSemestre" class="form-control"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Deuda Total Semestre:</label>
+                            <span id="finanzaDeudaTotalSemestre" class="form-control"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Estado:</label>
+                            <span id="finanzaEstado" class="form-control"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fecha de Creación:</label>
+                            <span id="finanzaFechaCreacion" class="form-control"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fecha de Actualización:</label>
+                            <span id="finanzaFechaActualizacion" class="form-control"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label">Pagos:</label>
+                            <ul id="finanzaPagos" class="list-group">
+                                <li class="list-group-item">Pago 1: <span id="finanzaPago1"></span></li>
+                                <li class="list-group-item">Pago 2: <span id="finanzaPago2"></span></li>
+                                <li class="list-group-item">Pago 3: <span id="finanzaPago3"></span></li>
+                                <li class="list-group-item">Pago 4: <span id="finanzaPago4"></span></li>
+                                <li class="list-group-item">Pago 5: <span id="finanzaPago5"></span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Loading Spinner -->
+<div class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+    </div>
+</div>
+<!-- Añade esto en tu sección head antes de tus propios scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+    // Ver detalles del finanza
+    // Ver detalles del finanza
+    function verDetallesFinanza(id) {
+        fetch(`/finanzas/detalles/${id}`) // Asegúrate de que la URL sea correcta
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Status: ${response.status}`);
+                }
+                return response.json(); // Cambia a .json() para obtener el objeto JSON directamente
+            })
+            .then(finanza => {
+                if (finanza) {
+                    // Actualizar modal con la información de la finanza
+                    document.getElementById('finanzaId').textContent = finanza.id;
+                    document.getElementById('finanzaAlumno').textContent = finanza.alumnoNombres;
+                    document.getElementById('finanzaPagoInscripcion').textContent = finanza.pagoInscripcion;
+                    document.getElementById('finanzaDescuento').textContent = finanza.descuento + '%';
+                    document.getElementById('finanzaValorSemestre').textContent = finanza.valorSemestre;
+                    document.getElementById('finanzaTotalPagadoSemestre').textContent = finanza.totalPagadoSemestre;
+                    document.getElementById('finanzaDeudaTotalSemestre').textContent = finanza.deudaTotalSemestre;
+                    document.getElementById('finanzaEstado').textContent = finanza.estado;
+                    document.getElementById('finanzaFechaCreacion').textContent = finanza.fechaCreacion ? finanza.fechaCreacion : 'No disponible';
+                    document.getElementById('finanzaFechaActualizacion').textContent = finanza.fechaActualizacion ? finanza.fechaActualizacion : 'No disponible';
+
+                    // Actualizar los pagos
+                    document.getElementById('finanzaPago1').textContent = finanza.pago1 || 'No registrado';
+                    document.getElementById('finanzaPago2').textContent = finanza.pago2 || 'No registrado';
+                    document.getElementById('finanzaPago3').textContent = finanza.pago3 || 'No registrado';
+                    document.getElementById('finanzaPago4').textContent = finanza.pago4 || 'No registrado';
+                    document.getElementById('finanzaPago5').textContent = finanza.pago5 || 'No registrado';
+
+                    // Mostrar el modal
+                    const modal = new bootstrap.Modal(document.getElementById('verDetallesFinanza')); // Cambié el ID aquí
+                    modal.show();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se encontraron datos de la finanza'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error al obtener detalles:", error);
+                alert("No se pudieron cargar los detalles de la finanza: " + error.message);
+            });
+    }// Declarar la variable en un ámbito global para la página
+let deleteId;
+
+// Asegurarnos de que se capture el ID cuando se abre el modal
+$('#deleteModal').on('show.bs.modal', function (event) {
+    const button = $(event.relatedTarget); // Botón que abrió el modal
+    deleteId = button.data('id'); // Extrae el ID del botón
+    console.log("ID a eliminar:", deleteId); // Para verificar que se captura correctamente
+});
+
+// Manejador del botón confirmar eliminación
+$('#confirmDelete').on('click', function () {
+    // Verificar que deleteId esté definido
+    if (typeof deleteId === 'undefined' || deleteId === null) {
+        console.error("Error: ID del registro no definido");
+        $('.modal-body').append('<div class="alert alert-danger mt-3">Error: No se pudo identificar el registro a eliminar</div>');
+        return;
+    }
+
+    const token = $("meta[name='_csrf']").attr("content");
+    const header = $("meta[name='_csrf_header']").attr("content");
+
+    console.log("ID a eliminar:", deleteId);
+    console.log("Token CSRF:", token);
+    console.log("Header CSRF:", header);
+
+    // Mostrar indicador de carga
+    const $btn = $(this);
+    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Eliminando...');
+
+    // Limpiar mensajes de error anteriores
+    $('.modal-body .alert').remove();
+
+    // Usar la ruta completa y absoluta
+    $.ajax({
+        url: '/delete/' + deleteId,  // Cambiar a la ruta completa correcta
+        type: 'DELETE',
+        contentType: 'application/json',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader(header, token);
+        },
+        success: function (result) {
+            // Cerrar el modal
+            $('#deleteModal').modal('hide');
+
+            // Mostrar notificación de éxito
+            Swal.fire({
+                icon: 'success',
+                title: 'Eliminado',
+                text: 'Registro eliminado correctamente.'
+            }).then(() => {
+                location.reload();
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Error al eliminar el registro:", xhr, status, error);
+
+            // Restaurar el botón
+            $btn.prop('disabled', false).html('Eliminar');
+
+            // Mensaje de error
+            let errorMsg = 'Error al eliminar el registro';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMsg = xhr.responseJSON.message;
+            } else if (xhr.responseText) {
+                try {
+                    const errorData = JSON.parse(xhr.responseText);
+                    errorMsg = errorData.message || errorData.error || errorMsg;
+                } catch (e) {
+                    errorMsg = xhr.responseText || errorMsg;
+                }
+            }
+
+            // Mostrar error en el modal
+            $('.modal-body').append(`<div class="alert alert-danger mt-3">${errorMsg}</div>`);
+        }
+    });
+});
+
+
+
+</script>
+
+
+</body>
+</html>

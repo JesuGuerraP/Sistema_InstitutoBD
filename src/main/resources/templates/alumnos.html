@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gestión de Alumnos</title>
+    <link th:href="@{/css/alumno.css}" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.min.css">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- DataTables -->
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<!-- Sidebar -->
+<nav class="sidebar"> <h4>
+    <i class="fas fa-graduation-cap"></i>
+   Instituto Técnico Atucsara
+    </h4>
+
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" id="searchInput" placeholder="Buscar alumno" aria-label="Buscar alumno" aria-describedby="button-search">
+        <button class="btn btn-primary" type="button" id="button-search" onclick="buscarAlumnos()">
+            <i class="fas fa-search"></i> Buscar
+        </button>
+    </div>
+
+    <div class="nav flex-column">
+        <a class="nav-link" href="/">
+            <i class="fas fa-home"></i> Inicio
+        </a>
+        <a class="nav-link active" href="/alumnos">
+            <i class="fas fa-users"></i> Alumnos
+        </a>
+        <a class="nav-link" href="/profesores">
+            <i class="fas fa-chalkboard-teacher"></i> Profesores
+        </a>
+        <a class="nav-link" href="/notas">
+            <i class="fas fa-star"></i> Notas
+        </a>
+        <a class="nav-link" href="/finanzas">
+            <i class="fas fa-dollar-sign"></i> Finanzas
+        </a>
+        <a class="nav-link" href="/acerca">
+            <i class="fas fa-info-circle"></i> Acerca de
+        </a>
+    </div>
+
+
+    <!-- Botón para abrir el modal de cerrar sesión -->
+    <a href="#" class="btn btn-danger" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+    </a>
+</nav>
+
+<div class="main-content">
+    <h1 class="text-center">Alumnos</h1>
+
+    <!-- Botón para agregar alumno -->
+    <div class="d-flex justify-content-end mb-4">
+        <a href="/alumnos/nuevo" class="btn btn-success">
+            <i class="fas fa-plus"></i> Agregar Nuevo Alumno
+        </a>
+    </div>
+
+    <!-- Tabla de alumnos -->
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>Identificación</th>
+                <th>Género</th>
+                <th>Dirección</th>
+                <th>Teléfono</th>
+
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="alumno : ${alumnos}">
+                <td th:text="${alumno.id}"></td>
+                <td th:text="${alumno.nombres}"></td>
+                <td th:text="${alumno.apellidos}"></td>
+                <td th:text="${alumno.identificacion}"></td>
+                <td th:text="${alumno.genero}"></td>
+                <td th:text="${alumno.direccion}"></td>
+                <td th:text="${alumno.telefono}"></td>
+
+                <td>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-info btn-sm me-1"
+                                th:onclick="'verDetallesAlumno(' + ${alumno.id} + ')'"
+                                title="Ver detalles">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <a th:href="@{/alumnos/update/{id}(id=${alumno.id})}"
+                           class="btn btn-warning btn-sm me-1"
+                           title="Editar">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <button type="button" class="btn btn-danger btn-sm" th:onclick="'eliminarAlumno(' + ${alumno.id} + ')'"
+                                title="Eliminar">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutModalLabel">Confirmar Cierre de Sesión</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas cerrar sesión?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <a href="/logout" class="btn btn-danger">Sí, cerrar sesión</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal de detalles -->
+<div class="modal fade" id="detallesAlumnoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalles del Alumno</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-4"><strong>ID:</strong></div>
+                    <div class="col-8" id="alumno-id"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Nombres:</strong></div>
+                    <div class="col-8" id="alumno-nombres"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Apellidos:</strong></div>
+                    <div class="col-8" id="alumno-apellidos"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Identificación:</strong></div>
+                    <div class="col-8" id="alumno-identificacion"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Género:</strong></div>
+                    <div class="col-8" id="alumno-genero"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Dirección:</strong></div>
+                    <div class="col-8" id="alumno-direccion"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Teléfono:</strong></div>
+                    <div class="col-8" id="alumno-telefono"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Correo:</strong></div>
+                    <div class="col-8" id="alumno-correoElectronico"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Fecha de Ingreso:</strong></div>
+                    <div class="col-8" id="alumno-fechaIngreso"></div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Nivel Academico:</strong></div>
+                    <div class="col-8" id="alumno-nivelAcademico"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Curso:</strong></div>
+                    <div class="col-8" id="alumno-curso"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Profesor:</strong></div>
+                    <div class="col-8" id="alumno-profesor"></div>
+
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Semestre:</strong></div>
+                    <div class="col-8" id="alumno-semestre"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.all.min.js"></script>
+<script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
+<script>
+
+    var token = $("meta[name='_csrf']").attr("content");
+var header = $("meta[name='_csrf_header']").attr("content");
+
+$(document).ajaxSend(function(e, xhr, options) {
+    if(header && token) {
+        xhr.setRequestHeader(header, token);
+    }
+});
+
+// Obtener el botón de cierre de sesión
+const logoutBtn = document.getElementById('logoutBtn');
+
+// Agregar un evento click al botón
+logoutBtn.addEventListener('click', (event) => {
+    event.preventDefault(); // Evitar que el enlace se ejecute directamente
+
+    // Abrir el modal manualmente
+    const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
+    logoutModal.show();
+});
+
+
+
+    // Función Buscar alumnos
+    function buscarAlumnos() {
+        const searchTerm = document.getElementById('searchInput').value;
+        const resultContainer = document.querySelector('tbody'); // Selecciona el tbody de la tabla
+        resultContainer.innerHTML = ''; // Limpiar resultados previos
+
+        // Determina el endpoint a utilizar
+        const endpoint = searchTerm.trim() === '' ? '/alumnos' : `/alumnos/buscarAlumnos?searchTerm=${encodeURIComponent(searchTerm)}`;
+
+        // Realiza la solicitud al servidor
+        fetch(endpoint)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la solicitud');
+                }
+                return response.json(); // Suponiendo que devuelves JSON
+            })
+            .then(alumnos => {
+                // Verifica si hay resultados
+                if (alumnos.length === 0) {
+                    const noResultsRow = document.createElement('tr');
+                    noResultsRow.innerHTML = '<td colspan="10" class="text-center">No se encontraron resultados.</td>';
+                    resultContainer.appendChild(noResultsRow);
+                    return;
+                }
+
+                // Agrega cada alumno a la tabla
+                alumnos.forEach(alumno => {
+                    const alumnoRow = document.createElement('tr');
+                    alumnoRow.innerHTML = `
+                        <td>${alumno.id}</td>
+                        <td>${alumno.nombres}</td>
+                        <td>${alumno.apellidos}</td>
+                        <td>${alumno.identificacion}</td>
+                        <td>${alumno.genero}</td>
+                        <td>${alumno.direccion}</td>
+                        <td>${alumno.telefono}</td>
+                        <td>${alumno.correoElectronico}</td>
+                        <td>${alumno.fechaIngreso}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-info btn-sm" onclick="verDetallesAlumno(${alumno.id})">
+                                    <i class="fas fa-eye"></i> Ver
+                                </button>
+                                <a href="/alumnos/update/${alumno.id}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="eliminarAlumno(${alumno.id})">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    resultContainer.appendChild(alumnoRow);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    // Ver detalles del alumno
+    function verDetallesAlumno(id) {
+        fetch(`/alumnos/detalles/${id}`)
+            .then(response => response.json())
+            .then(alumno => {
+                if (alumno) {
+                    document.getElementById('alumno-id').textContent = alumno.id || '';
+                    document.getElementById('alumno-nombres').textContent = alumno.nombres || '';
+                    document.getElementById('alumno-apellidos').textContent = alumno.apellidos || '';
+                    document.getElementById('alumno-identificacion').textContent = alumno.identificacion || '';
+                    document.getElementById('alumno-genero').textContent = alumno.genero || '';
+                    document.getElementById('alumno-direccion').textContent = alumno.direccion || '';
+                    document.getElementById('alumno-telefono').textContent = alumno.telefono || '';
+                    document.getElementById('alumno-correoElectronico').textContent = alumno.correoElectronico || '';
+                    document.getElementById('alumno-fechaIngreso').textContent = alumno.fechaIngreso || '';
+                    document.getElementById('alumno-nivelAcademico').textContent = alumno.nivelAcademico || '';
+                    document.getElementById('alumno-curso').textContent = alumno.curso || '';
+                    document.getElementById('alumno-profesor').textContent = alumno.profesor.nombres || '';
+                    document.getElementById('alumno-semestre').textContent = alumno.semestre || '';
+
+                    const modal = new bootstrap.Modal(document.getElementById('detallesAlumnoModal'));
+                    modal.show();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se encontraron datos del alumno'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error al obtener detalles:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudieron cargar los detalles del alumno'
+                });
+            });
+    }
+
+    function eliminarAlumno(id) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Esta acción no se puede deshacer",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/alumnos/delete/${id}`, {
+                    method: 'POST'
+                })
+                .then(() => {
+                    Swal.fire(
+                        '¡Eliminado!',
+                        'El alumno ha sido eliminado.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                })
+                .catch(() => {
+                    Swal.fire(
+                        'Error',
+                        'No se pudo eliminar el alumno.',
+                        'error'
+                    );
+                });
+            }
+        });
+    }
+
+    // Limpiar modal al cerrar
+    const detallesAlumnoModal = document.getElementById('detallesAlumnoModal');
+    detallesAlumnoModal.addEventListener('hidden.bs.modal', () => {
+        ['id', 'nombres', 'apellidos', 'identificacion', 'genero', 'direccion',
+         'telefono', 'correoElectronico', 'fechaIngreso'].forEach(campo => {
+            document.getElementById(`alumno-${campo}`).textContent = '';
+        });
+    });
+</script>
+
+
+</body>
+</html>

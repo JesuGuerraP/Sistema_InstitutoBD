@@ -53,7 +53,7 @@ public class AlumnoService {
 
         // 2. Buscar todas las finanzas asociadas a este alumno
         //    (Necesitas asegurarte de que FinanzaRepository tenga un método como findByAlumnoId)
-        //    Si no lo tienes, añádelo a FinanzaRepository: List<Finanza> findByAlumnoId(Long alumnoId);
+        //    Si no lo tiehhnes, añádelo a FinanzaRepository: List<Finanza> findByAlumnoId(Long alumnoId);
         List<Finanza> finanzasAsociadas = finanzaRepository.findByAlumnoId(id);
 
         // 3. Desvincular el alumno de cada finanza asociada
@@ -74,7 +74,9 @@ public class AlumnoService {
         return alumnoRepository.findAll().stream()
                 .filter(alumno -> alumno.getNombres().toLowerCase().contains(searchTerm.toLowerCase())
                         || alumno.getApellidos().toLowerCase().contains(searchTerm.toLowerCase())
+                        || alumno.getCurso().toLowerCase().contains(searchTerm.toLowerCase())
                         || alumno.getIdentificacion().toLowerCase().contains(searchTerm.toLowerCase()))
+
                 .collect(Collectors.toList());
     }
 }

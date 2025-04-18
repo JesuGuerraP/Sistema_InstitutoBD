@@ -100,6 +100,8 @@ public class FinanzaController {
         return ResponseEntity.ok(finanzaService.findAll());
     }
 
+
+
     // Método adicional para obtener finanzas por alumnoId
     @GetMapping("/alumno/{alumnoId}")
     @ResponseBody
@@ -209,9 +211,12 @@ public class FinanzaController {
         return ResponseEntity.noContent().build(); // Respuesta 204 No Content
     }
 
-    // Otros métodos...
+    @GetMapping("/buscarFinanzas")
+    @ResponseBody
+    public List<Finanza> buscarFinanzas (@RequestParam("searchTerm")String searchTerm){
+        return finanzaService.buscarFinanzas(searchTerm);
+    }
 }
-
 
 
 

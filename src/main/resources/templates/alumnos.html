@@ -3,6 +3,8 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Gestión de Alumnos</title>
     <link th:href="@{/css/alumno.css}" rel="stylesheet" />
@@ -339,40 +341,61 @@ logoutBtn.addEventListener('click', (event) => {
     }
 
     function eliminarAlumno(id) {
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: "Esta acción no se puede deshacer",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(`/alumnos/delete/${id}`, {
-                    method: 'POST'
-                })
-                .then(() => {
-                    Swal.fire(
-                        '¡Eliminado!',
-                        'El alumno ha sido eliminado.',
-                        'success'
-                    ).then(() => {
-                        location.reload();
-                    });
-                })
-                .catch(() => {
-                    Swal.fire(
-                        'Error',
-                        'No se pudo eliminar el alumno.',
-                        'error'
-                    );
-                });
-            }
-        });
+    // Obtener tokens CSRF con manejo de errores
+    const csrfMeta = document.querySelector('meta[name="_csrf"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+
+    if (!csrfMeta || !csrfHeaderMeta) {
+        console.error('Meta tags CSRF no encontrados');
+        Swal.fire('Error', 'Configuración de seguridad faltante', 'error');
+        return;
     }
 
+    const csrfToken = csrfMeta.content;
+    const csrfHeader = csrfHeaderMeta.content;
+
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡Esta acción no se puede deshacer!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/alumnos/delete/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    [csrfHeader]: csrfToken,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || 'Error del servidor'); });
+                }
+                return response.json();
+            })
+            .then(() => {
+                Swal.fire(
+                    '¡Eliminado!',
+                    'El alumno ha sido eliminado correctamente.',
+                    'success'
+                ).then(() => location.reload());
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error',
+                    error.message || 'No se pudo completar la eliminación',
+                    'error'
+                );
+            });
+        }
+    });
+}
     // Limpiar modal al cerrar
     const detallesAlumnoModal = document.getElementById('detallesAlumnoModal');
     detallesAlumnoModal.addEventListener('hidden.bs.modal', () => {

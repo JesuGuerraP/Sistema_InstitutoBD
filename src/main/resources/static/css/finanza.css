@@ -49,9 +49,12 @@
     padding: 2rem;
 }
 
-.table th {
-    background-color: #f8f9fa;
+
+.table-dark {
+  background-color: #343a40;
+  border-color: #343a40;
 }
+
 
 .modal-header {
     background-color: #f8f9fa;
@@ -120,21 +123,15 @@
     transform: translate(-50%, -50%);
     z-index: 2000;
 }
-.btn-editar {
-    background-color: #0d6efd; /* Color de fondo */
-    color: #fff; /* Color del texto */
-    padding: 0.75rem 1.5rem; /* Espaciado interno */
-    border: none; /* Sin borde */
-    border-radius: 0.375rem; /* Bordes redondeados */
-    font-size: 1rem; /* Tamaño de fuente */
-    cursor: pointer; /* Cambia el cursor al pasar el mouse */
-    transition: background-color 0.3s ease; /* Transición suave */
+/* Button styles */
+button {
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.btn-editar:hover {
-    background-color: #0056b3; /* Color al pasar el mouse */
-}
-
-.btn-editar:active {
-    background-color: #004085; /* Color al hacer clic */
+button:hover {
+  background-color: #495057;
+  color: #fff;
 }

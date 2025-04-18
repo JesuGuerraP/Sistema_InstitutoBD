@@ -47,17 +47,18 @@
                     <div th:if="${#fields.hasErrors('alumnoId')}" class="text-danger" th:errors="*{alumnoId}"></div>
                 </div>
 
-                <!-- Campo para el estado -->
+                <!-- Campo para el estado
                 <div class="mb-3">
                     <label for="estado" class="form-label">Estado</label>
-                    <select class="form-select" id="estado" th:field="*{estado}" required>
+                    <select class="form-select" id="estado" th:field="*{estado}" >
                         <option value="">Seleccione un estado</option>
                         <option value="PENDIENTE">PENDIENTE</option>
                         <option value="PAGO_PARCIAL">PAGO PARCIAL</option>
                         <option value="PAGADO">PAGADO</option>
                     </select>
                     <div th:if="${#fields.hasErrors('estado')}" class="text-danger" th:errors="*{estado}"></div>
-                </div>
+                </div>-->
+                <input type="hidden" th:field="*{estado}">
 
                 <!-- Campo para el pago de inscripción -->
                 <div class="mb-3">

@@ -1,10 +1,15 @@
 package com.atucsara.Sistema_InstitutoBD.Controllers;
 
+import com.atucsara.Sistema_InstitutoBD.exeptions.ResourceNotFoundException;
 import com.atucsara.Sistema_InstitutoBD.models.Alumno;
+import com.atucsara.Sistema_InstitutoBD.models.Finanza;
 import com.atucsara.Sistema_InstitutoBD.models.Profesor;
+import com.atucsara.Sistema_InstitutoBD.repositories.AlumnoRepository;
+import com.atucsara.Sistema_InstitutoBD.repositories.FinanzaRepository;
 import com.atucsara.Sistema_InstitutoBD.services.AlumnoService;
 import com.atucsara.Sistema_InstitutoBD.services.ProfesorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +17,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -24,6 +31,11 @@ public class AlumnoController {
 
     @Autowired
     private ProfesorService profesorService;
+    @Autowired
+    private AlumnoRepository alumnoRepository;
+
+    @Autowired
+    private FinanzaRepository finanzaRepository;
 
     // Ver detalles del alumno (endpoint para el modal)
     @GetMapping("/detalles/{id}")
@@ -136,13 +148,45 @@ public class AlumnoController {
         }
         return "redirect:/alumnos"; // Redirige a la lista de alumnos
     }
-    @PostMapping("/delete/{id}")
-    public String deleteAlumno(@PathVariable Long id) {
-        Optional<Alumno> alumno = alumnoService.findById(id);  // Comprobar si el alumno existe antes de eliminar
-        if (alumno.isPresent()) {
-            alumnoService.delete(id);
+    @DeleteMapping("/delete/{id}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> deleteAlumno(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Verificar existencia primero
+            Alumno alumno = alumnoRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Alumno no encontrado con ID: " + id));
+
+            // Desvincular finanzas
+            List<Finanza> finanzas = finanzaRepository.findByAlumnoId(id);
+            finanzas.forEach(f -> {
+                f.setAlumno(null);
+                finanzaRepository.save(f);
+            });
+
+            // Eliminar alumno
+            alumnoRepository.delete(alumno); // Usar delete en lugar de deleteById para mejor manejo de excepciones
+
+            response.put("success", true);
+            response.put("message", "Alumno eliminado correctamente");
+            return ResponseEntity.ok(response);
+
+        } catch (ResourceNotFoundException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+
+        } catch (DataIntegrityViolationException e) {
+            response.put("success", false);
+            response.put("message", "No se puede eliminar por restricciones de base de datos");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error interno: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        return "redirect:/alumnos"; // Redirecciona después de eliminar
     }
 
     @GetMapping("/buscarAlumnos")
@@ -152,6 +196,5 @@ public class AlumnoController {
     }
 
 }
-
 
 

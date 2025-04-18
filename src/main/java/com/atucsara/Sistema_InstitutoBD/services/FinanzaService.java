@@ -19,4 +19,5 @@ public interface FinanzaService {
     void desvincularAlumnoDeFinanza(Long id);
     boolean existsById(Long id);
 
+    List<Finanza> buscarFinanzas(String searchTerm);
 }

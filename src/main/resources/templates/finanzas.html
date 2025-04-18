@@ -29,9 +29,10 @@
 
     <div class="input-group mb-3">
         <input type="text" class="form-control" id="searchInput" placeholder="Buscar Finanza">
-        <button class="btn btn-primary" type="button" id="searchButton">
+        <button class="btn btn-primary" type="button" id="searchButton" onclick="buscarFinanzas()">
             <i class="fas fa-search"></i>
         </button>
+
     </div>
 
     <div class="nav flex-column">
@@ -67,48 +68,15 @@
             <i class="fas fa-dollar-sign"></i> Finanzas
         </h1>
         <a href="/finanzas/new" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Nueva Finanza
+            <i class="fas fa-plus"></i> Agregar Nueva Finanza
         </a>
     </div>
 
-    <!-- Filtros -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    <label class="form-label">Estado de pago</label>
-                    <select class="form-select" id="estadoPagoFilter">
-                        <option value="">Todos</option>
-                        <option value="pagado">Pagado</option>
-                        <option value="pendiente">Pendiente</option>
-                        <option value="atrasado">Atrasado</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Ordenar por</label>
-                    <select class="form-select" id="ordenarPor">
-                        <option value="nombre">Nombre</option>
-                        <option value="deuda">Deuda Total</option>
-                        <option value="fecha">Fecha de Pago</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Mostrar</label>
-                    <select class="form-select" id="mostrarRegistros">
-                        <option value="10">10 registros</option>
-                        <option value="25">25 registros</option>
-                        <option value="50">50 registros</option>
-                        <option value="100">100 registros</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Tabla de Finanzas -->
     <div class="table-responsive">
         <table class="table table-striped table-hover" id="finanzasTable">
-            <thead>
+            <thead class="table-dark">
             <tr>
                 <th>ID</th>
                 <th>Alumno</th>
@@ -147,18 +115,17 @@
                             </span>
                 </td>
                 <td>
-                    <div class="btn-group">
-                        <!-- Botón de Editar -->
-                        <a th:href="@{/finanzas/editar/{id}(id=${finanza.id})}" class="btn btn-editar">
-                            <i class="fas fa-edit"></i> Editar
-                        </a>
-
-
+                    <div class="btn-group" role ="group">
                         <button type="button" class="btn btn-info btn-sm me-1"
                                 th:onclick="'verDetallesFinanza(' + ${finanza.id} + ')'"
                                 title="Ver detalles">
                             <i class="fas fa-eye"></i> Ver
                         </button>
+
+                        <!-- Botón de Editar -->
+                        <a th:href="@{/finanzas/editar/{id}(id=${finanza.id})}" class="btn btn-warning btn-sm me-1">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
 
                         <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" th:data-id="${finanza.id}">
                             <i class="fas fa-trash"></i>
@@ -266,7 +233,24 @@
         </div>
     </div>
 </div>
-
+<!-- Modal cerrar secion  -->
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutModalLabel">Confirmar Cierre de Sesión</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas cerrar sesión?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <a href="/logout" class="btn btn-danger">Sí, cerrar sesión</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Loading Spinner -->
 <div class="loading-spinner">
@@ -361,7 +345,7 @@ $('#confirmDelete').on('click', function () {
 
     // Usar la ruta completa y absoluta
     $.ajax({
-        url: '/delete/' + deleteId,  // Cambiar a la ruta completa correcta
+        url: '/finanzas/delete/' + deleteId,  // Cambiar a la ruta completa correcta
         type: 'DELETE',
         contentType: 'application/json',
         beforeSend: function(xhr) {
@@ -404,6 +388,124 @@ $('#confirmDelete').on('click', function () {
         }
     });
 });
+
+   function buscarFinanzas() {
+    const searchTerm = document.getElementById('searchInput').value;
+    const resultContainer = document.querySelector('tbody'); // Selecciona el tbody de la tabla
+    resultContainer.innerHTML = ''; // Limpiar resultados previos
+
+    // Determina el endpoint a utilizar
+    const endpoint = searchTerm.trim() === '' ? '/finanzas' : `/finanzas/buscarFinanzas?searchTerm=${encodeURIComponent(searchTerm)}`;
+
+    // Realiza la solicitud al servidor
+    fetch(endpoint)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la solicitud');
+            }
+            return response.json(); // Suponiendo que devuelves JSON
+        })
+        .then(finanzas => {
+            // Verifica si hay resultados
+            if (finanzas.length === 0) {
+                const noResultsRow = document.createElement('tr');
+                noResultsRow.innerHTML = '<td colspan="10" class="text-center">No se encontraron resultados.</td>';
+                resultContainer.appendChild(noResultsRow);
+                return;
+            }
+
+            // Agrega cada finanza a la tabla
+            finanzas.forEach(finanza => {
+                // Asegúrate que el nombre del alumno exista, usa el formato correcto de propiedad
+                const nombreAlumno = finanza.alumno ? finanza.alumno.nombres || finanza.alumnoNombres || 'Sin nombre' : finanza.alumnoNombres || 'Sin nombre';
+
+                // Evitar NaN en los cálculos y asegurar valores numéricos
+                const valorSemestre = Number(finanza.valorSemestre) || 0;
+                const totalPagadoSemestre = Number(finanza.totalPagadoSemestre) || 0;
+                const deudaTotalSemestre = Number(finanza.deudaTotalSemestre) || 0;
+
+                // Calcular porcentaje de progreso (evitar división por cero)
+                const porcentajePago = valorSemestre > 0 ? (totalPagadoSemestre / valorSemestre) * 100 : 0;
+
+                const finanzaRow = document.createElement('tr');
+                finanzaRow.innerHTML = `
+                    <td>${finanza.id}</td>
+                    <td>${nombreAlumno}</td>
+                    <td>${formatCurrency(finanza.pagoInscripcion)}</td>
+                    <td>${finanza.descuento + '%'}</td>
+                    <td>${formatCurrency(valorSemestre)}</td>
+                    <td>
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar"
+                                 style="width: ${porcentajePago}%;"
+                                 aria-valuenow="${porcentajePago}"
+                                 aria-valuemin="0" aria-valuemax="100">
+                                ${formatDecimal(porcentajePago, 1, 1)}%
+                            </div>
+                        </div>
+                    </td>
+                    <td>${formatCurrency(totalPagadoSemestre)}</td>
+                    <td>${formatCurrency(deudaTotalSemestre)}</td>
+                    <td>
+                        <span class="${deudaTotalSemestre === 0 ? 'badge bg-success' :
+                                      (deudaTotalSemestre === valorSemestre ? 'badge bg-danger' : 'badge bg-warning')}">
+                            ${deudaTotalSemestre === 0 ? 'Pagado' :
+                              (deudaTotalSemestre === valorSemestre ? 'Pendiente' : 'Parcial')}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="btn-group" role ="group">
+                        <button type="button" class="btn btn-info btn-sm me-1"
+                                th:onclick="'verDetallesFinanza(' + ${finanza.id} + ')'"
+                                title="Ver detalles">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+
+                        <!-- Botón de Editar -->
+                        <a th:href="@{/finanzas/editar/{id}(id=${finanza.id})}" class="btn btn-warning btn-sm me-1">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+
+                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" th:data-id="${finanza.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    </td>
+                `;
+                resultContainer.appendChild(finanzaRow);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const errorRow = document.createElement('tr');
+            errorRow.innerHTML = '<td colspan="10" class="text-center text-danger">Error al cargar los datos. Por favor, intente nuevamente.</td>';
+            resultContainer.appendChild(errorRow);
+        });
+}
+
+// Función para formatear moneda
+function formatCurrency(value) {
+    return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(Number(value) || 0);
+}
+
+// Función para formatear decimal
+function formatDecimal(value, minimumFractionDigits, maximumFractionDigits) {
+    return new Intl.NumberFormat('es-PE', { minimumFractionDigits, maximumFractionDigits }).format(Number(value) || 0);
+}
+
+    // Obtener el botón de cierre de sesión
+const logoutBtn = document.getElementById('logoutBtn');
+
+// Agregar un evento click al botón
+logoutBtn.addEventListener('click', (event) => {
+    event.preventDefault(); // Evitar que el enlace se ejecute directamente
+
+    // Abrir el modal manualmente
+    const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
+    logoutModal.show();
+});
+
+
 
 
 

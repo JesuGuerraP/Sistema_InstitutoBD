@@ -3,6 +3,7 @@ package com.atucsara.Sistema_InstitutoBD.Controllers;
 import com.atucsara.Sistema_InstitutoBD.models.Alumno;
 import com.atucsara.Sistema_InstitutoBD.models.Nota;
 import com.atucsara.Sistema_InstitutoBD.models.Profesor;
+import com.atucsara.Sistema_InstitutoBD.repositories.NotaRepository;
 import com.atucsara.Sistema_InstitutoBD.services.AlumnoService;
 import com.atucsara.Sistema_InstitutoBD.services.NotaService;
 import com.atucsara.Sistema_InstitutoBD.services.ProfesorService;
@@ -14,9 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -26,12 +25,14 @@ public class NotaController {
     private final NotaService notaService;
     private final AlumnoService alumnoService;
     private final ProfesorService profesorService;
+    private NotaRepository notaRepository;
 
     @Autowired
-    public NotaController(NotaService notaService, AlumnoService alumnoService, ProfesorService profesorService) {
+    public NotaController(NotaService notaService, AlumnoService alumnoService, ProfesorService profesorService, NotaRepository notaRepository) {
         this.notaService = notaService;
         this.alumnoService = alumnoService;
         this.profesorService = profesorService;
+        this.notaRepository = notaRepository;
     }
 
 
@@ -126,29 +127,64 @@ public class NotaController {
 
     @GetMapping("/modulo")
     public String mostrarInformePorModulo(@RequestParam String modulo, Model model) {
-        // 1. Buscar las notas por el módulo ingresado (necesitarás implementar este método en tu NotaService)
-        List<Nota> notas = notaService.buscarPorModulo(modulo);
+        // Obtener notas con relaciones cargadas
+        List<Nota> notas = notaRepository.findByModuloWithAlumnoAndProfesor(modulo);
 
-        // 2. Si encontraste notas, podrías intentar obtener información del alumno asociado
-        //    Esto dependerá de cómo esté estructurada tu base de datos y cómo se relacionan las notas con los alumnos.
-        //    Una nota, ¿siempre pertenece a un único alumno? Si es así, podrías obtener el primer alumno de la lista de notas (si no está vacía).
-        Alumno alumno = null;
+        // Agrupar por alumno y calcular estadísticas
+        Map<String, Map<String, Object>> reporteAlumnos = new LinkedHashMap<>();
+
+        notas.stream()
+                .filter(nota -> nota.getAlumno() != null)
+                .collect(Collectors.groupingBy(
+                        nota -> nota.getAlumno().getNombres() + " " + nota.getAlumno().getApellidos(),
+                        LinkedHashMap::new,
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                notasAlumno -> {
+                                    Map<String, Object> datos = new HashMap<>();
+
+                                    // Datos básicos
+                                    datos.put("notas", notasAlumno);
+
+                                    // Cálculo de estadísticas
+                                    DoubleSummaryStatistics stats = notasAlumno.stream()
+                                            .mapToDouble(Nota::getValorNota)
+                                            .summaryStatistics();
+
+                                    datos.put("promedio",notaService.calcularPromedioPonderado(notasAlumno));
+                                    datos.put("maxima", stats.getMax());
+                                    datos.put("minima", stats.getMin());
+                                    datos.put("total", stats.getCount());
+
+                                    return datos;
+                                }
+                        )
+                ))
+                .forEach((nombreAlumno, datos) -> reporteAlumnos.put(nombreAlumno, datos));
+
+        // Calcular resumen general
+        Map<String, Object> resumenGeneral = new HashMap<>();
         if (!notas.isEmpty()) {
-            // Asumiendo que cada nota tiene una referencia a un alumno
-            alumno = notas.get(0).getAlumno(); // Necesitas tener el método getAlumno() en tu clase Nota
-            // Si hay múltiples alumnos con notas en este módulo, tendrías que decidir cuál mostrar o cómo manejarlos.
+            DoubleSummaryStatistics stats = notas.stream()
+                    .mapToDouble(Nota::getValorNota)
+                    .summaryStatistics();
+
+            resumenGeneral.put("totalAlumnos", reporteAlumnos.size());
+            resumenGeneral.put("promedioGeneral", stats.getAverage());
+            resumenGeneral.put("notaMaxima", stats.getMax());
+            resumenGeneral.put("notaMinima", stats.getMin());
         }
 
-        // 3. Pasar el alumno y las notas al modelo
-        model.addAttribute("alumno", alumno);
-        model.addAttribute("moduloBuscado", modulo); // Opcional, para mostrar el módulo buscado en la vista
-        model.addAttribute("notas", notas);
+        // Agregar al modelo
+        model.addAttribute("modulo", modulo);
+        model.addAttribute("reporteAlumnos", reporteAlumnos);
+        model.addAttribute("resumenGeneral", resumenGeneral);
 
-        // 4. Devolver el nombre de la vista que quieres mostrar (tu archivo HTML)
-        System.out.println("Se está retornando la vista: informeNotasModulo");
         return "informeNotasModulo";
-
     }
+
+
+
 
     @GetMapping("/informe/{alumnoId}/{modulo}")
     public String generarInformeNotas(@PathVariable Long alumnoId, @PathVariable String modulo, Model model) {

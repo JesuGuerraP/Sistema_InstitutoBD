@@ -5,13 +5,16 @@ import com.atucsara.Sistema_InstitutoBD.models.Nota;
 import com.atucsara.Sistema_InstitutoBD.models.Profesor;
 import com.atucsara.Sistema_InstitutoBD.repositories.NotaRepository;
 import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.springframework.data.jpa.domain.Specification.where;
 
 @Service
 @Transactional
@@ -86,7 +89,7 @@ public class NotaService { // Marcar la clase como transaccional por defecto
         Map<Nota.GrupoActividad, Double> notasPonderadas = new HashMap<>();
 
         for (Nota.GrupoActividad grupo : Nota.GrupoActividad.values()) {
-            Integer conteo = notaRepository.contarNotasByGrupoActividad(alumno, modulo, grupo);
+            Integer conteo = Math.toIntExact(notaRepository.contarNotasByGrupoActividad(alumno, modulo, grupo));
             conteoActividades.put(grupo, conteo);
             Double promedio = promediosPorGrupo.getOrDefault(grupo, 0.0);
             notasPonderadas.put(grupo, Math.round((promedio * (grupo.getPorcentaje() / 100.0)) * 100.0) / 100.0);
@@ -99,4 +102,101 @@ public class NotaService { // Marcar la clase como transaccional por defecto
 
         return resumen;
     }
+
+
+    // Métodos adicionales para el Service
+    public Map<String, Object> obtenerResumenGeneralModulo(String modulo) {
+        List<Nota> notas = buscarPorModulo(modulo);
+        Map<Alumno, List<Nota>> notasPorAlumno = notas.stream()
+                .filter(nota -> nota.getAlumno() != null)
+                .collect(Collectors.groupingBy(Nota::getAlumno));
+
+        return calcularResumenGeneralModulo(notasPorAlumno);
+    }
+
+    private Map<String, Object> calcularResumenGeneralModulo(Map<Alumno, List<Nota>> notasPorAlumno) {
+        Map<String, Object> resumen = new HashMap<>();
+
+        // Obtener todas las notas válidas
+        List<Double> todasLasNotas = notasPorAlumno.values().stream()
+                .flatMap(notasAlumno -> notasAlumno.stream()
+                        .map(Nota::getValorNota)
+                        .filter(Objects::nonNull))
+                .collect(Collectors.toList());
+
+        if (!todasLasNotas.isEmpty()) {
+            // Calcular estadísticas generales
+            DoubleSummaryStatistics stats = todasLasNotas.stream()
+                    .mapToDouble(Double::doubleValue)
+                    .summaryStatistics();
+
+            // Calcular total de aprobados (promedio >= 3.0)
+            long totalAprobados = notasPorAlumno.keySet().stream()
+                    .filter(alumno -> {
+                        Double promedio = calcularPromedioAlumno(notasPorAlumno.get(alumno));
+                        return promedio != null && promedio >= 3.0;
+                    })
+                    .count();
+
+            resumen.put("totalAlumnos", notasPorAlumno.size());
+            resumen.put("promedioGeneral", stats.getAverage());
+            resumen.put("notaMaxima", stats.getMax());
+            resumen.put("notaMinima", stats.getMin());
+            resumen.put("totalAprobados", totalAprobados);
+            resumen.put("totalReprobados", notasPorAlumno.size() - totalAprobados);
+        } else {
+            // Valores por defecto si no hay notas
+            resumen.put("totalAlumnos", 0);
+            resumen.put("promedioGeneral", 0.0);
+            resumen.put("notaMaxima", "N/A");
+            resumen.put("notaMinima", "N/A");
+            resumen.put("totalAprobados", 0);
+            resumen.put("totalReprobados", 0);
+        }
+
+        return resumen;
+    }
+
+    // En NotaService
+    public Double calcularPromedioAlumno(List<Nota> notas) {
+        return Optional.ofNullable(notas)
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(Objects::nonNull)
+                .mapToDouble(n -> Optional.ofNullable(n.getValorNota()).orElse(0.0))
+                .average()
+                .orElse(0.0);
+    }
+
+    public Double calcularPromedioPonderado(List<Nota> notas) {
+        // Agrupar notas por tipo de actividad
+        Map<Nota.GrupoActividad, List<Nota>> notasPorGrupo = notas.stream()
+                .collect(Collectors.groupingBy(Nota::getGrupoActividad));
+
+        // Calcular promedios parciales
+        double promedioActividades1 = calcularPromedioGrupo(
+                notasPorGrupo.getOrDefault(Nota.GrupoActividad.ACTIVIDADES_1, Collections.emptyList()));
+
+        double promedioActividades2 = calcularPromedioGrupo(
+                notasPorGrupo.getOrDefault(Nota.GrupoActividad.ACTIVIDADES_2, Collections.emptyList()));
+
+        double promedioEvaluacionFinal = calcularPromedioGrupo(
+                notasPorGrupo.getOrDefault(Nota.GrupoActividad.EVALUACION_FINAL, Collections.emptyList()));
+
+        // Aplicar ponderaciones
+        return (promedioActividades1 * 0.30)
+                + (promedioActividades2 * 0.30)
+                + (promedioEvaluacionFinal * 0.40);
+    }
+
+    private double calcularPromedioGrupo(List<Nota> notas) {
+        if (notas == null || notas.isEmpty()) {
+            return 0.0;
+        }
+        return notas.stream()
+                .mapToDouble(Nota::getValorNota)
+                .average()
+                .orElse(0.0);
+    }
+
 }

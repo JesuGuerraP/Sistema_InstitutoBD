@@ -41,7 +41,7 @@ public class ProfesorService {
 
 
 
-    public List<Profesor> obtenerTodosLosAlumnos() {
+    public List<Profesor> obtenerTodosLosProfesores() {
         return profesorRepository.findAll();
     }
 

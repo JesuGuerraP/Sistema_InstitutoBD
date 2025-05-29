@@ -37,11 +37,35 @@ public class NotaController {
 
 
     @GetMapping
-    public String listarNotas(Model model) {
-        List<Nota> notas =notaService.buscarPorModulo("");
-        model.addAttribute("notas", notaService.buscarPorModulo(""));
-        return "notas";
+    public String listarNotas(
+            @RequestParam(required = false) String modulo,
+            @RequestParam(required = false) Long alumnoId,
+            @RequestParam(required = false) Nota.GrupoActividad grupo,
+            Model model) {
+        try {
+            // Obtener datos filtrados
+            List<Nota> notas = notaService.buscarNotasFiltradas(modulo, alumnoId, grupo);
+
+            // Añadir todos los atributos necesarios - CORREGIDO: solo un atributo notas
+            model.addAttribute("notas", notas != null ? notas : Collections.emptyList());
+            model.addAttribute("activeMenu", "notas");
+            model.addAttribute("modulosUnicos", notaService.obtenerModulosUnicos());
+            model.addAttribute("alumnos", alumnoService.obtenerTodosLosAlumnos());
+            model.addAttribute("gruposActividad", Nota.GrupoActividad.values());
+
+            // Mantener los valores de filtro
+            model.addAttribute("moduloFiltro", modulo);
+            model.addAttribute("alumnoIdFiltro", alumnoId);
+            model.addAttribute("grupoFiltro", grupo);
+
+            return "notas";
+        } catch (Exception e) {
+            e.printStackTrace(); // Añade esto para ver el stacktrace completo
+            model.addAttribute("error", "Ocurrió un error al cargar las notas: " + e.getMessage());
+            return "error"; // Cambia a una página de error genérica
+        }
     }
+
 
     @GetMapping("/nueva")
     public String mostrarFormularioNuevaNota(Model model) {
@@ -64,7 +88,7 @@ public class NotaController {
         Optional<Nota> nota = notaService.buscarPorId(id);
         if (nota.isPresent()) {
             model.addAttribute("nota", nota.get());
-            model.addAttribute("estudiantes", alumnoService.obtenerTodosLosAlumnos());
+            model.addAttribute("alumnos", alumnoService.obtenerTodosLosAlumnos());
             model.addAttribute("profesores", profesorService.obtenerTodosLosProfesores());
             model.addAttribute("gruposActividad", Nota.GrupoActividad.values());
             return "nueva-nota";

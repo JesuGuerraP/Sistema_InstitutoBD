@@ -4,6 +4,8 @@ import com.atucsara.Sistema_InstitutoBD.models.Alumno;
 import com.atucsara.Sistema_InstitutoBD.models.Nota;
 import com.atucsara.Sistema_InstitutoBD.models.Nota.GrupoActividad;
 import com.atucsara.Sistema_InstitutoBD.models.Profesor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -70,15 +72,17 @@ public interface NotaRepository extends JpaRepository<Nota, Long> {
     // Consulta para obtener módulos distintos
     @Query("SELECT DISTINCT n.modulo FROM Nota n ORDER BY n.modulo")
     List<String> findDistinctModulos();
+    ;
 
     // Consulta optimizada para cargar relaciones
     @Query("SELECT DISTINCT n FROM Nota n JOIN FETCH n.alumno LEFT JOIN FETCH n.profesor")
     List<Nota> findAllWithAlumnoAndProfesor();
 
     // En NotaRepository.java
-    @Query("SELECT DISTINCT n FROM Nota n " +
-            "LEFT JOIN FETCH n.alumno " +
-            "LEFT JOIN FETCH n.profesor " +
-            "ORDER BY n.fechaRegistro DESC")
+    @Query("SELECT DISTINCT n FROM Nota n LEFT JOIN FETCH n.alumno LEFT JOIN FETCH n.profesor")
     List<Nota> findAllWithRelations();
+
+
+
+List<Nota> findAll(Specification<Nota> spec, Sort fechaRegistro);
 }

@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -197,6 +199,63 @@ public class NotaService { // Marcar la clase como transaccional por defecto
                 .mapToDouble(Nota::getValorNota)
                 .average()
                 .orElse(0.0);
+    }
+    // Método para buscar notas con filtros
+    public List<Nota> buscarNotasFiltradas(String modulo, Long alumnoId, Nota.GrupoActividad grupo) {
+        try {
+            Specification<Nota> spec = Specification.where(null);
+
+            if (modulo != null && !modulo.isEmpty()) {
+                spec = spec.and((root, query, cb) -> cb.equal(root.get("modulo"), modulo));
+            }
+
+            if (alumnoId != null) {
+                spec = spec.and((root, query, cb) -> cb.equal(root.get("alumno").get("id"), alumnoId));
+            }
+
+            if (grupo != null) {
+                spec = spec.and((root, query, cb) -> cb.equal(root.get("grupoActividad"), grupo));
+            }
+
+            return notaRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "fechaRegistro"));
+        } catch (Exception e) {
+            throw new RuntimeException("Error al buscar notas filtradas", e);
+        }
+    }
+
+    // Métodos auxiliares para Specification
+    private Specification<Nota> withModulo(String modulo) {
+        return (root, query, cb) ->
+                modulo == null || modulo.isEmpty() ?
+                        cb.conjunction() :
+                        cb.equal(root.get("modulo"), modulo);
+    }
+
+    private Specification<Nota> withAlumno(Long alumnoId) {
+        return (root, query, cb) ->
+                alumnoId == null ?
+                        cb.conjunction() :
+                        cb.equal(root.join("alumno").get("id"), alumnoId);
+    }
+
+    private Specification<Nota> withGrupo(Nota.GrupoActividad grupo) {
+        return (root, query, cb) ->
+                grupo == null ?
+                        cb.conjunction() :
+                        cb.equal(root.get("grupoActividad"), grupo);
+    }
+    // Método para obtener módulos únicos
+    public List<String> obtenerModulosUnicos() {
+        try {
+            return notaRepository.findDistinctModulos();
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener módulos únicos", e);
+        }
+    }
+
+    // Método optimizado para obtener todas las notas con relaciones cargadas
+    public List<Nota> findAllWithRelations() {
+        return notaRepository.findAllWithAlumnoAndProfesor();
     }
 
 }

@@ -1,115 +1,209 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instituto Técnico Laboral Atucsara</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #5247e4;
+            --primary-light: #818cf8;
+            --secondary: #6b7280;
+            --light: #f8f9fa;
+            --dark: #1f2937;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9fafb;
+            color: var(--dark);
+        }
+
+        /* Header and Navigation */
+        .navbar {
+            background-color: #ffffff;
+            box-shadow: var(--shadow);
+            padding: 0.8rem 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--dark);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .navbar-toggler {
+            border: none;
+        }
+
+        /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, #4f46e5, #818cf8);
-            padding: 40px 0;  /* Reducido de 100px */
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            padding: 40px 0;
             color: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;  /* Añadido para mejor espaciado */
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;charset=utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="%23ffffff" fill-opacity="0.05" d="M0,224L48,213.3C96,203,192,181,288,192C384,203,480,245,576,250.7C672,256,768,224,864,202.7C960,181,1056,171,1152,186.7C1248,203,1344,245,1392,266.7L1440,288L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"%3E%3C/path%3E%3C/svg%3E');
+            background-size: cover;
+            background-position: center bottom;
         }
 
         .hero-content {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             text-align: center;
-            animation: fadeInUp 0.5s;  /* Reducido tiempo de animación */
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-icon {
+            font-size: 48px;
+            color: #ffffff;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+            text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.15);
         }
 
         .hero-title {
-            font-size: 36px;  /* Reducido de 48px */
-            font-weight: bold;
-            margin-bottom: 10px;  /* Reducido de 20px */
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .hero-description {
-            font-size: 18px;  /* Reducido de 24px */
-            margin-bottom: 20px;  /* Reducido de 40px */
+            font-size: 18px;
+            margin-bottom: 25px;
             opacity: 0.9;
+            font-weight: 300;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .hero-icon {
-            font-size: 56px;  /* Reducido de 82px */
-            color: #ffffff;
-            margin-bottom: 15px;  /* Reducido de 30px */
-            animation: bounce 2s infinite;
+        /* Features Section */
+        .features-section {
+            padding: 20px 0 60px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
         .feature-box {
             background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            padding: 25px;  /* Reducido de 30px */
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 30px;
             text-align: center;
             transition: all 0.3s ease;
-            height: 100%;  /* Asegura altura uniforme */
-            margin-bottom: 20px;  /* Añadido para mejor espaciado móvil */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 3px solid transparent;
         }
 
         .feature-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            border-bottom: 3px solid var(--primary-light);
         }
 
         .feature-icon {
-            font-size: 36px;  /* Reducido de 48px */
-            color: #4f46e5;
-            margin-bottom: 15px;  /* Reducido de 20px */
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-box:hover .feature-icon {
+            transform: scale(1.1);
         }
 
         .feature-title {
-            font-size: 20px;  /* Reducido de 24px */
-            font-weight: bold;
-            margin-bottom: 8px;  /* Reducido de 10px */
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark);
         }
 
         .feature-description {
-            font-size: 14px;  /* Reducido de 16px */
-            color: #6b7280;
-            margin-bottom: 15px;
+            font-size: 15px;
+            color: var(--secondary);
+            margin-bottom: 20px;
         }
 
         .btn-hero {
-            font-size: 16px;  /* Reducido de 18px */
-            padding: 10px 30px;  /* Reducido de 15px 40px */
-            border-radius: 25px;
+            font-size: 16px;
+            padding: 10px 25px;
+            border-radius: 30px;
             background-color: white;
-            color: #4f46e5;
+            color: var(--primary);
             border: none;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             transition: all 0.3s ease;
             display: inline-block;
+            font-weight: 500;
         }
 
         .btn-hero:hover {
             transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            background-color: #f8f9fa;
-            color: #818cf8;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            background-color: var(--light);
+            color: var(--primary-light);
             text-decoration: none;
         }
 
-        .container {
-            padding-top: 20px;  /* Añadido para mejor espaciado */
+        /* Animations */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
 
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-15px);}  /* Reducido de -20px */
-            60% {transform: translateY(-7px);}   /* Reducido de -10px */
-        }
-
-        /* Mejoras responsive */
-        @media (max-width: 768px) {
+        /* Responsive Improvements */
+        @media (max-width: 991px) {
             .hero {
-                padding: 30px 0;
+                padding: 40px 0;
             }
 
             .hero-title {
@@ -119,76 +213,130 @@
             .hero-description {
                 font-size: 16px;
             }
+        }
+
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
 
             .hero-icon {
-                font-size: 48px;
+                font-size: 42px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .feature-box {
+                padding: 20px;
             }
         }
     </style>
 </head>
 <body>
-<div class="hero">
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="/"><i class="fas fa-school mr-2"></i>Atucsara</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/alumnos">Alumnos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/profesores">Profesores</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/notas">Notas</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/finanzas">Finanzas</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
     <div class="hero-content animate__animated animate__fadeIn">
         <i class="fas fa-school hero-icon"></i>
         <h1 class="hero-title">Bienvenido al Instituto Técnico Laboral Atucsara</h1>
         <p class="hero-description">Explore nuestras secciones y gestiona eficientemente tus recursos</p>
     </div>
-</div>
+</section>
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="feature-box">
-                <i class="fas fa-user-graduate feature-icon"></i>
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="menu-grid">
+            <div class="feature-box animate__animated animate__fadeInUp">
+                <div class="feature-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
                 <h3 class="feature-title">Alumnos</h3>
                 <p class="feature-description">Gestiona la información de tus alumnos</p>
                 <a href="/alumnos" class="btn btn-hero">Ver Alumnos</a>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="feature-box">
-                <i class="fas fa-chalkboard-teacher feature-icon"></i>
+
+            <div class="feature-box animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                <div class="feature-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
                 <h3 class="feature-title">Profesores</h3>
                 <p class="feature-description">Administra el equipo docente del instituto</p>
                 <a href="/profesores" class="btn btn-hero">Ver Profesores</a>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="feature-box">
-                <i class="fas fa-book-open feature-icon"></i>
+
+            <div class="feature-box animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+                <div class="feature-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
                 <h3 class="feature-title">Notas</h3>
                 <p class="feature-description">Revisa y gestiona las notas de los estudiantes</p>
                 <a href="/notas" class="btn btn-hero">Ver Notas</a>
             </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-4">
-            <div class="feature-box">
-                <i class="fas fa-chart-line feature-icon"></i>
+            <div class="feature-box animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
                 <h3 class="feature-title">Finanzas</h3>
                 <p class="feature-description">Controla los ingresos y egresos del instituto</p>
                 <a href="/finanzas" class="btn btn-hero">Ver Finanzas</a>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="feature-box">
-                <i class="fas fa-cogs feature-icon"></i>
-                <h3 class="feature-title">Configuración</h3>
-                <p class="feature-description">Ajusta los parámetros y preferencias del sistema</p>
-                <a href="/configuracion" class="btn btn-hero">Ir a Configuración</a>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="feature-box">
-                <i class="fas fa-info-circle feature-icon"></i>
-                <h3 class="feature-title">Acerca de</h3>
-                <p class="feature-description">Información sobre el Instituto Técnico Laboral Atucsara</p>
-                <a href="/acerca" class="btn btn-hero">Ver Acerca de</a>
-            </div>
-        </div>
     </div>
-</div>
+</section>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // Add animation to feature boxes on scroll
+    $(document).ready(function() {
+        function revealOnScroll() {
+            var scrolled = $(window).scrollTop();
+            $('.animate__animated').each(function() {
+                var $this = $(this),
+                    offsetTop = $this.offset().top;
+                var scrollDistance = scrolled + $(window).height() - 100;
+
+                if (scrollDistance > offsetTop) {
+                    var animationClass = $this.attr('class').split('animate__')[1].split(' ')[0];
+                    $this.addClass('animate__' + animationClass);
+                }
+            });
+        }
+
+        $(window).on('scroll', revealOnScroll);
+    });
+</script>
 </body>
 </html>
